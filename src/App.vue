@@ -1,14 +1,16 @@
 <script setup>
 // import SampleOne from './components/practices/basic/SampleOne.vue'
 // import SampleTwo from './components/practices/basic/SampleTwo.vue'
-import WeatherHomeView from './views/WeatherHomeView.vue'
+// import WeatherHomeView from './views/WeatherHomeView.vue'
+import WeatherCompositionView from './views/WeatherCompositionView.vue'
 </script>
 
 <template>
   <div style="padding: 20px">
     <!-- <SampleOne /> -->
     <!-- <SampleTwo /> -->
-    <WeatherHomeView />
+    <!-- <WeatherHomeView /> -->
+    <WeatherCompositionView />
   </div>
 </template>
 
