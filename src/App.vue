@@ -2,7 +2,8 @@
 // import SampleOne from './components/practices/basic/SampleOne.vue'
 // import SampleTwo from './components/practices/basic/SampleTwo.vue'
 // import WeatherHomeView from './views/WeatherHomeView.vue'
-import WeatherCompositionView from './views/WeatherCompositionView.vue'
+// import WeatherCompositionView from './views/WeatherCompositionView.vue'
+import WeatherComponentView from './views/WeatherComponentView.vue'
 </script>
 
 <template>
@@ -10,7 +11,8 @@ import WeatherCompositionView from './views/WeatherCompositionView.vue'
     <!-- <SampleOne /> -->
     <!-- <SampleTwo /> -->
     <!-- <WeatherHomeView /> -->
-    <WeatherCompositionView />
+    <!-- <WeatherCompositionView /> -->
+    <WeatherComponentView />
   </div>
 </template>
 
