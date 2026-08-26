@@ -159,3 +159,91 @@ Mock 데이터를 기반으로 여러 도시의 날씨 정보를 카드 형태�
 `src/App.vue`  
 `src/views/WeatherHomeView.vue`  
 `src/assets/main.css`
+
+### 03. Weather Component
+
+#### 학습 내용
+
+- Vue 컴포넌트를 역할별로 분리하는 방법 이해
+- 부모 컴포넌트와 자식 컴포넌트 간 데이터 전달 방식 학습
+- `props`를 활용한 부모 → 자식 데이터 전달
+- `emits`를 활용한 자식 → 부모 이벤트 전달
+- `<slot>`을 활용한 공통 레이아웃 컴포넌트 구성
+- `<style scoped>`를 활용한 컴포넌트별 스타일 분리
+- 기존 기능을 유지하면서 컴포넌트 구조로 리팩터링하는 방법 이해
+
+#### 실습 내용
+
+- 기존 `WeatherCompositionView.vue`에 구현되어 있던 날씨 대시보드 기능을 컴포넌트 단위로 분리
+- `WeatherParent.vue`에서 전체 반응형 상태와 비즈니스 로직 관리
+  - `weatherList`
+  - `searchQuery`
+  - `selectedCityInfo`
+  - `computed`
+  - `watch`
+  - `watchEffect`
+- `BaseDashboardCard.vue`를 생성하여 검색 영역과 날씨 목록 영역에서 사용하는 공통 카드 디자인 구성
+- `<slot>`을 사용하여 부모 컴포넌트에서 전달한 내용을 공통 카드 내부에 렌더링
+- `SearchBar.vue`를 생성하여 검색 입력 UI 분리
+  - `currentQuery`를 `props`로 전달받아 현재 검색어 표시
+  - 검색어 변경 시 `update-query` 이벤트를 발생시켜 부모 컴포넌트에 변경된 값 전달
+- `WeatherCard.vue`를 생성하여 도시별 날씨 카드 UI 분리
+  - 도시 객체를 `props`로 전달받아 도시명, 날씨 상태, 기온 출력
+  - 카드 클릭 시 `select-card` 이벤트 발생
+  - 상세보기 버튼 클릭 시 `click-detail` 이벤트 발생
+  - `.stop` 이벤트 수식어를 적용하여 상세보기 클릭 시 카드 선택 이벤트가 함께 실행되지 않도록 처리
+- `WeatherComponentView.vue`를 별도로 생성하여 `WeatherParent` 컴포넌트를 페이지 단위로 렌더링
+- 각 컴포넌트의 스타일을 `<style scoped>`로 분리하여 스타일 적용 범위를 해당 컴포넌트로 제한
+- 기존 검색, 조건부 렌더링, 카드 선택, 상세보기 기능이 컴포넌트 분리 이후에도 동일하게 동작하는지 확인
+
+#### 실습 결과
+
+기존 하나의 파일에 집중되어 있던 날씨 대시보드 UI와 로직을 역할에 따라 여러 컴포넌트로 분리했다. 상위 `WeatherParent.vue`에서 반응형 상태와 검색 로직을 관리하고, `SearchBar.vue`와 `WeatherCard.vue`는 필요한 데이터를 `props`로 전달받아 화면을 렌더링하도록 구성했다.
+
+자식 컴포넌트에서 발생한 사용자 동작은 `emits`를 통해 부모에게 전달하도록 구현했으며, `BaseDashboardCard.vue`에서는 `<slot>`을 사용해 서로 다른 콘텐츠에 동일한 카드 스타일을 재사용했다. 이를 통해 기능은 유지하면서 코드의 역할과 책임을 명확하게 분리할 수 있었다.
+
+#### 핵심 정리
+
+- **Component**
+  - 화면과 기능을 역할 단위로 분리하여 재사용하고 관리하기 위한 Vue의 기본 구성 단위
+  - 기능이 커질수록 하나의 파일에 모든 내용을 작성하는 것보다 역할별 컴포넌트 분리가 유지보수에 유리함
+
+- **Props**
+  - 부모 컴포넌트가 자식 컴포넌트로 데이터를 전달할 때 사용하는 방식
+  - 자식 컴포넌트는 전달받은 값을 직접 변경하기보다 필요한 이벤트를 부모에게 전달하는 방식으로 구성하는 것이 좋음
+
+- **Emits**
+  - 자식 컴포넌트에서 발생한 이벤트나 값을 부모 컴포넌트에 전달할 때 사용
+  - 이번 실습에서는 검색어 변경, 카드 선택, 상세보기 이벤트 전달에 활용함
+
+- **Slot**
+  - 부모 컴포넌트에서 전달한 Template 내용을 자식 컴포넌트의 지정된 위치에 삽입할 수 있는 기능
+  - 공통 레이아웃은 유지하면서 내부 콘텐츠만 다르게 구성할 때 유용함
+
+- **style scoped**
+  - 작성한 CSS가 현재 컴포넌트에만 적용되도록 범위를 제한함
+  - 컴포넌트 간 스타일 충돌을 줄이고 각 컴포넌트의 UI를 독립적으로 관리할 수 있음
+
+- **컴포넌트 분리**
+  - 단순히 파일 수를 늘리는 것이 아니라 상태 관리, UI 표현, 이벤트 처리 등 각 역할과 책임을 구분하는 것이 중요함
+
+#### 컴포넌트 구조
+
+```text
+WeatherComponentView.vue
+└─ WeatherParent.vue
+   ├─ BaseDashboardCard.vue
+   │  └─ SearchBar.vue
+   │
+   └─ BaseDashboardCard.vue
+      └─ WeatherCard.vue
+```
+
+#### 직접 구현 및 수정한 파일
+
+`src/components/exercise/WeatherParent.vue`  
+`src/components/exercise/BaseDashboardCard.vue`  
+`src/components/exercise/SearchBar.vue`  
+`src/components/exercise/WeatherCard.vue`  
+`src/views/WeatherComponentView.vue`  
+`src/App.vue`
