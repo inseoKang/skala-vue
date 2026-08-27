@@ -1,10 +1,19 @@
 <script setup>
+import Card from 'primevue/card'
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
+
 import { useConfigStore } from '@/stores/configStore'
 
 defineProps({
   cityItem: {
     type: Object,
     required: true,
+  },
+
+  layout: {
+    type: String,
+    default: 'grid',
   },
 })
 
@@ -14,100 +23,123 @@ const configStore = useConfigStore()
 </script>
 
 <template>
-  <article class="weather-card" @click="emit('select-card', cityItem.name)">
-    <div class="weather-info">
-      <h3>{{ cityItem.name }} ({{ cityItem.status }})</h3>
+  <Card
+    class="weather-card"
+    :class="{ 'list-card': layout === 'list' }"
+    @click="emit('select-card', cityItem.name)"
+  >
+    <template #title>
+      <div class="card-title">
+        <div>
+          <span class="city-name">{{ cityItem.name }}</span>
 
-      <p>
-        현재 기온:
-        <strong>{{ configStore.formatTemperature(cityItem.temp) }}</strong>
-      </p>
+          <span class="weather-status">
+            {{ cityItem.status }}
+          </span>
+        </div>
 
-      <span v-if="cityItem.temp >= 25" class="weather-badge hot"> 🔥 더움 (25도 이상) </span>
+        <span class="temperature">
+          {{ configStore.formatTemperature(cityItem.temp) }}
+        </span>
+      </div>
+    </template>
 
-      <span v-else class="weather-badge cool"> ❄️ 선선함 (25도 미만) </span>
-    </div>
+    <template #content>
+      <div class="weather-content">
+        <div class="weather-meta">
+          <Tag v-if="cityItem.temp >= 25" value="🔥 더움" severity="danger" />
 
-    <button @click.stop="emit('click-detail', cityItem)">상세보기</button>
-  </article>
+          <Tag v-else value="❄️ 선선함" severity="info" />
+
+          <span v-if="cityItem.humidity !== undefined"> 💧 습도 {{ cityItem.humidity }}% </span>
+
+          <span v-if="cityItem.windSpeed !== undefined"> 💨 {{ cityItem.windSpeed }} m/s </span>
+        </div>
+
+        <Button
+          label="상세보기"
+          severity="info"
+          outlined
+          size="small"
+          @click.stop="emit('click-detail', cityItem)"
+        />
+      </div>
+    </template>
+  </Card>
 </template>
 
 <style scoped>
 .weather-card {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 18px 20px;
-  background-color: white;
-  border: 1px solid #e0e5ec;
-  border-radius: 12px;
+  height: 100%;
   cursor: pointer;
   transition:
     transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
+    box-shadow 0.18s ease;
 }
 
 .weather-card:hover {
-  transform: translateY(-2px);
-  border-color: #bfd4f6;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
 }
 
-.weather-card:last-child {
-  margin-bottom: 0;
+.card-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
 }
 
-.weather-info h3 {
-  margin: 0 0 7px;
-  color: #1f2937;
-  font-size: 16px;
-  font-weight: 700;
+.city-name {
+  display: block;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 800;
 }
 
-.weather-info p {
-  margin: 0 0 10px;
-  color: #667085;
-  font-size: 14px;
-}
-
-.weather-info strong {
-  color: #1f2937;
-}
-
-.weather-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-  border-radius: 999px;
-}
-
-.hot {
-  background-color: #ff6b6b;
-}
-
-.cool {
-  background-color: #4dabf7;
-}
-
-button {
-  padding: 9px 15px;
-  color: #2563eb;
+.weather-status {
+  display: block;
+  margin-top: 5px;
+  color: #7b8494;
   font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
+  font-weight: 500;
 }
 
-button:hover {
-  background-color: #dbeafe;
+.temperature {
+  color: #2563eb;
+  font-size: 24px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.weather-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.weather-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.list-card .weather-content {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+  .card-title {
+    flex-direction: column;
+  }
+
+  .list-card .weather-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>
