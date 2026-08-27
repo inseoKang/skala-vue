@@ -48,22 +48,22 @@ const sortOptions = [
 
 const rowOptions = [
   {
-    label: '5개씩 보기',
-    value: 5,
+    label: '10개씩',
+    value: 10,
   },
   {
-    label: '10개씩 보기',
-    value: 10,
+    label: '5개씩',
+    value: 5,
   },
 ]
 
 const layoutOptions = [
   {
-    label: 'Grid',
+    label: '카드',
     value: 'grid',
   },
   {
-    label: 'List',
+    label: '목록',
     value: 'list',
   },
 ]
@@ -71,116 +71,126 @@ const layoutOptions = [
 
 <template>
   <div class="weather-toolbar">
-    <div class="search-group">
+    <div class="search-control">
       <label for="city-search">도시 검색</label>
 
       <InputText
         id="city-search"
         :model-value="currentQuery"
-        placeholder="검색할 도시를 입력하세요"
+        placeholder="서울, 부산, 제주..."
         fluid
         @update:model-value="emit('update-query', $event)"
       />
     </div>
 
-    <div class="toolbar-controls">
-      <div class="control-group">
-        <label>정렬</label>
+    <div class="control">
+      <label>정렬</label>
 
-        <Select
-          :model-value="sortKey"
-          :options="sortOptions"
-          option-label="label"
-          option-value="value"
-          placeholder="정렬 기준"
-          fluid
-          @update:model-value="emit('update-sort', $event)"
-        />
-      </div>
-
-      <div class="control-group">
-        <label>표시 개수</label>
-
-        <Select
-          :model-value="rows"
-          :options="rowOptions"
-          option-label="label"
-          option-value="value"
-          fluid
-          @update:model-value="emit('update-rows', $event)"
-        />
-      </div>
-
-      <div class="control-group layout-group">
-        <label>보기 방식</label>
-
-        <SelectButton
-          :model-value="layout"
-          :options="layoutOptions"
-          option-label="label"
-          option-value="value"
-          :allow-empty="false"
-          @update:model-value="emit('update-layout', $event)"
-        />
-      </div>
+      <Select
+        :model-value="sortKey"
+        :options="sortOptions"
+        option-label="label"
+        option-value="value"
+        fluid
+        @update:model-value="emit('update-sort', $event)"
+      />
     </div>
 
-    <p class="query-info">
-      현재 검색어:
-      <strong>{{ currentQuery || '없음' }}</strong>
-    </p>
+    <div class="control rows-control">
+      <label>표시</label>
+
+      <Select
+        :model-value="rows"
+        :options="rowOptions"
+        option-label="label"
+        option-value="value"
+        fluid
+        @update:model-value="emit('update-rows', $event)"
+      />
+    </div>
+
+    <div class="control layout-control">
+      <label>보기</label>
+
+      <SelectButton
+        :model-value="layout"
+        :options="layoutOptions"
+        option-label="label"
+        option-value="value"
+        :allow-empty="false"
+        @update:model-value="emit('update-layout', $event)"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .weather-toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(180px, 1fr) 130px auto;
+  gap: 12px;
+  align-items: end;
 }
 
-.search-group,
-.control-group {
+.search-control,
+.control {
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 
-.search-group label,
-.control-group label {
-  color: #475569;
+label {
+  color: var(--text-subtle);
   font-size: 12px;
   font-weight: 700;
 }
 
-.toolbar-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 14px;
-  align-items: end;
+.layout-control {
+  min-width: 140px;
 }
 
-.layout-group {
-  min-width: 180px;
-}
-
-.query-info {
-  margin: 0;
-  color: #7b8494;
+:deep(.p-inputtext),
+:deep(.p-select) {
+  min-height: 42px;
   font-size: 13px;
+  border-color: var(--line);
+  border-radius: 10px;
+  box-shadow: none;
 }
 
-.query-info strong {
-  color: #334155;
+:deep(.p-inputtext:focus),
+:deep(.p-select.p-focus) {
+  border-color: #9ac2ee;
+  box-shadow: 0 0 0 3px rgba(61, 126, 219, 0.08);
 }
 
-@media (max-width: 768px) {
-  .toolbar-controls {
+:deep(.p-selectbutton) {
+  display: flex;
+}
+
+:deep(.p-selectbutton .p-togglebutton) {
+  min-height: 42px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+@media (max-width: 850px) {
+  .weather-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .search-control {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .weather-toolbar {
     grid-template-columns: 1fr;
   }
 
-  .layout-group {
-    min-width: 0;
+  .search-control {
+    grid-column: auto;
   }
 }
 </style>
