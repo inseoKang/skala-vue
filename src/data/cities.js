@@ -24,6 +24,30 @@ export const cities = [
     lon: 128.6014,
   },
   {
+    id: 'city_05',
+    name: '인천',
+    lat: 37.4563,
+    lon: 126.7052,
+  },
+  {
+    id: 'city_06',
+    name: '대전',
+    lat: 36.3504,
+    lon: 127.3845,
+  },
+  {
+    id: 'city_07',
+    name: '광주',
+    lat: 35.1595,
+    lon: 126.8526,
+  },
+  {
+    id: 'city_08',
+    name: '울산',
+    lat: 35.5384,
+    lon: 129.3114,
+  },
+  {
     id: 'city_09',
     name: '제주',
     lat: 33.4996,

@@ -6,6 +6,7 @@ import { useConfigStore } from '@/stores/configStore'
 import { cities } from '@/data/cities'
 
 import { getCurrentWeather, getWeatherForecast, getAirQuality } from '@/services/weatherApi'
+import Button from 'primevue/button'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,7 +93,7 @@ onMounted(() => {
         {{ errorMessage }}
       </p>
 
-      <button @click="goHome">메인 대시보드로 돌아가기</button>
+      <Button label="메인 대시보드로 돌아가기" @click="goHome" />
     </div>
 
     <template v-else-if="city">
