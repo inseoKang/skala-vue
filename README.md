@@ -663,3 +663,171 @@ WeatherHomeView / WeatherDetailView
 `src/services/weatherApi.js`  
 `src/views/WeatherHomeView.vue`  
 `src/views/WeatherDetailView.vue`
+
+### 07. Weather UI Library
+
+#### 학습 내용
+
+- 외부 UI Library를 Vue 프로젝트에 적용하는 방법 이해
+- PrimeVue와 Theme Preset을 활용한 UI 구성 방법 학습
+- 기존 HTML/CSS 기반 UI를 PrimeVue 컴포넌트로 변경하는 방법 이해
+- `DataView`를 활용한 데이터 목록 및 페이지네이션 구성
+- `InputText`와 `Select`를 활용한 검색 및 정렬 UI 구현
+- `SelectButton`을 활용한 Grid / List 레이아웃 전환
+- `Card`, `Button`, `Tag`를 활용한 날씨 카드 UI 개선
+- `ProgressSpinner`를 활용한 API Loading 상태 표현
+- 기존 Axios, Pinia, Vue Router 기능을 유지하면서 UI 기능을 확장하는 방법 이해
+
+#### 실습 내용
+
+- Vue 프로젝트에 PrimeVue와 PrimeVue Theme 패키지 설치
+- `main.js`에 PrimeVue를 등록하고 Aura Theme 적용
+- 기존 날씨 Application에 PrimeVue UI 컴포넌트 적용
+- 기존 검색 영역을 확장하여 `WeatherToolbar.vue` 신규 생성
+- `InputText`를 활용하여 도시 검색 기능 구성
+- `Select`를 활용하여 날씨 데이터 정렬 기능 추가
+  - 기본 순서
+  - 기온 높은 순
+  - 기온 낮은 순
+  - 도시 이름순
+- 페이지당 표시할 데이터 개수를 선택할 수 있도록 기능 추가
+  - 5개씩 보기
+  - 10개씩 보기
+- `DataView`의 Paginator를 활용하여 날씨 목록 페이지네이션 구현
+- Grid / List 두 가지 방식으로 날씨 데이터를 확인할 수 있도록 레이아웃 전환 기능 추가
+- PrimeVue 4 환경에 맞게 `SelectButton`을 사용하여 Grid / List 보기 방식 선택 기능 구현
+- 페이지네이션 동작을 확인하기 위해 기존 도시 데이터를 10개 지역으로 확장
+- `WeatherCard.vue`에 PrimeVue `Card`를 적용하여 카드 UI 개선
+- 날씨 상태 표현에 `Tag` 컴포넌트 적용
+  - 기온 25도 이상 → 더움
+  - 기온 25도 미만 → 선선함
+- 상세보기 및 온도 단위 변경 버튼에 PrimeVue `Button` 적용
+- API 데이터를 불러오는 동안 `ProgressSpinner`를 표시하도록 Loading UI 개선
+- 기존 Axios를 통한 실제 날씨 API 조회 기능 유지
+- 기존 Pinia Store의 Celsius / Fahrenheit 단위 변경 기능 유지
+- 기존 Vue Router의 날씨 상세 페이지 이동 기능 유지
+
+#### 실습 결과
+
+기존 날씨 대시보드에 PrimeVue UI Library를 적용하여 단순한 카드 목록 형태의 화면을 검색, 정렬, 페이지네이션, 레이아웃 전환이 가능한 데이터 대시보드 형태로 확장했다.
+
+도시 검색뿐만 아니라 기온 높은 순, 기온 낮은 순, 도시 이름순으로 데이터를 정렬할 수 있도록 기능을 추가했으며, 사용자가 한 페이지에 5개 또는 10개의 날씨 정보를 선택하여 확인할 수 있도록 구성했다. `DataView`의 Paginator를 활용하여 데이터가 여러 페이지로 나누어 표시되는 것도 확인했다.
+
+또한 Grid와 List 두 가지 레이아웃을 제공하여 사용자가 원하는 형태로 날씨 데이터를 확인할 수 있도록 했으며, `Card`, `Tag`, `Button`, `ProgressSpinner` 등의 PrimeVue 컴포넌트를 적용하여 기존 직접 작성한 UI보다 일관된 디자인으로 개선했다.
+
+기존에 구현한 OpenWeatherMap API 연동, Open-Meteo 대기질 API, Pinia 온도 단위 변경, Vue Router 상세 페이지 이동 등의 기능은 그대로 유지하면서 UI Library를 활용한 사용자 인터페이스와 데이터 탐색 기능을 추가했다.
+
+#### 핵심 정리
+
+- **PrimeVue**
+  - Vue에서 사용할 수 있는 외부 UI Component Library
+  - Button, Card, Select, DataView 등 다양한 UI 컴포넌트를 제공함
+  - 직접 모든 UI와 스타일을 구현하지 않고 일관된 형태의 인터페이스를 구성할 수 있음
+
+- **Theme Preset**
+  - PrimeVue 컴포넌트에 공통 디자인을 적용하기 위한 Theme 설정
+  - 이번 실습에서는 Aura Theme를 적용함
+
+- **DataView**
+  - 배열 형태의 데이터를 List 또는 Grid 형태로 출력할 때 사용하는 PrimeVue 컴포넌트
+  - 이번 실습에서는 날씨 카드 목록과 페이지네이션 구현에 활용함
+
+- **Pagination**
+  - 많은 데이터를 여러 페이지로 나누어 표시하는 방식
+  - 사용자가 한 번에 확인해야 하는 데이터 양을 줄이고 목록 탐색을 편리하게 할 수 있음
+  - 이번 실습에서는 5개 또는 10개 단위로 날씨 정보를 표시하도록 구현함
+
+- **InputText**
+  - PrimeVue에서 제공하는 입력 컴포넌트
+  - 도시명 검색 기능에 활용함
+
+- **Select**
+  - 여러 선택지 중 하나의 값을 선택할 수 있는 UI 컴포넌트
+  - 정렬 기준과 페이지당 표시 개수 선택에 활용함
+
+- **SelectButton**
+  - 여러 선택지를 버튼 형태로 제공하는 컴포넌트
+  - 이번 실습에서는 Grid / List 보기 방식을 선택하는 데 활용함
+
+- **Card**
+  - 관련 정보를 하나의 영역으로 묶어 표현할 때 사용하는 컴포넌트
+  - 각 도시의 날씨 데이터를 카드 형태로 표시하는 데 활용함
+
+- **Tag**
+  - 상태나 카테고리와 같은 간단한 정보를 강조하여 표시하는 컴포넌트
+  - 기온에 따라 `더움`, `선선함` 상태를 구분하는 데 활용함
+
+- **ProgressSpinner**
+  - 비동기 작업이 진행 중임을 사용자에게 보여주는 Loading UI
+  - 실제 날씨 API 응답을 기다리는 동안 표시하도록 구현함
+
+- **정렬**
+  - API로 받아온 날씨 데이터를 사용자가 원하는 기준으로 재배치하는 기능
+  - 원본 배열을 직접 변경하지 않고 복사한 데이터에 정렬을 적용하도록 구성함
+
+- **Grid / List Layout**
+  - 동일한 데이터를 서로 다른 형태로 표현하는 방식
+  - Grid에서는 여러 날씨 카드를 한 화면에 배치하고, List에서는 각 도시를 한 줄 단위로 확인할 수 있도록 구성함
+
+#### UI 기능 구조
+
+```text
+WeatherHomeView
+      │
+      ├─ WeatherToolbar
+      │     ├─ InputText
+      │     │    └─ 도시 검색
+      │     │
+      │     ├─ Select
+      │     │    ├─ 정렬 기준
+      │     │    └─ 5 / 10개 보기
+      │     │
+      │     └─ SelectButton
+      │          └─ Grid / List
+      │
+      └─ DataView
+            ├─ Pagination
+            │
+            ├─ Grid
+            │    └─ WeatherCard
+            │
+            └─ List
+                 └─ WeatherCard
+```
+
+#### 기존 기능과 UI Library 연동
+
+```text
+OpenWeatherMap / Open-Meteo
+            │
+            ▼
+        Axios API
+            │
+            ▼
+     WeatherHomeView
+            │
+            ├─ 검색 / 정렬
+            ├─ Pagination
+            ├─ Grid / List
+            │
+            └─ WeatherCard
+                    │
+                    ├─ PrimeVue Card / Tag / Button
+                    │
+                    ├─ Pinia
+                    │    └─ °C ↔ °F
+                    │
+                    └─ Vue Router
+                         └─ 상세 페이지
+```
+
+#### 직접 구현 및 수정한 파일
+
+`package.json`  
+`package-lock.json`  
+`src/main.js`  
+`src/data/cities.js`  
+`src/components/exercise/WeatherToolbar.vue`  
+`src/components/exercise/WeatherCard.vue`  
+`src/components/exercise/UnitToggler.vue`  
+`src/views/WeatherHomeView.vue`
