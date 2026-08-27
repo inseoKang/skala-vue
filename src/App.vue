@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import UnitToggler from '@/components/exercise/UnitToggler.vue'
 </script>
 
 <template>
@@ -8,13 +9,17 @@ import { RouterLink, RouterView } from 'vue-router'
       <div class="header-inner">
         <h1>🌤️ Weather Dashboard</h1>
 
-        <nav>
-          <RouterLink to="/"> 날씨 </RouterLink>
+        <div class="navigation-area">
+          <nav>
+            <RouterLink to="/"> 날씨 </RouterLink>
 
-          <RouterLink to="/about"> 서비스 소개 </RouterLink>
+            <RouterLink to="/about"> 서비스 소개 </RouterLink>
 
-          <RouterLink to="/guide"> 이용 가이드 </RouterLink>
-        </nav>
+            <RouterLink to="/guide"> 이용 가이드 </RouterLink>
+          </nav>
+
+          <UnitToggler />
+        </div>
       </div>
     </header>
 
@@ -51,6 +56,12 @@ import { RouterLink, RouterView } from 'vue-router'
   font-size: 20px;
 }
 
+.navigation-area {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 nav {
   display: flex;
   gap: 24px;
@@ -75,6 +86,11 @@ nav a.router-link-exact-active {
   .header-inner {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .navigation-area {
+    flex-direction: column;
+    gap: 12px;
   }
 }
 </style>
