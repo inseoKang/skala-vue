@@ -247,3 +247,132 @@ WeatherComponentView.vue
 `src/components/exercise/WeatherCard.vue`  
 `src/views/WeatherComponentView.vue`  
 `src/App.vue`
+
+### 04. Weather Router
+
+#### 학습 내용
+
+- Vue Router를 활용한 SPA 페이지 이동 방식 이해
+- `createRouter()`와 `createWebHistory()`를 활용한 Router 설정
+- `RouterLink`를 활용한 선언적 페이지 이동
+- `RouterView`를 활용한 현재 URL에 대응하는 View 렌더링
+- `useRouter()`를 활용한 프로그래밍 방식의 페이지 이동
+- `useRoute()`와 Route Parameter를 활용한 동적 라우팅
+- `/:pathMatch(.*)*`를 활용한 404 Not Found 페이지 처리
+- 여러 View를 역할별로 분리하여 페이지 구조를 구성하는 방법 이해
+
+#### 실습 내용
+
+- 기존 날씨 대시보드 기능을 `WeatherHomeView.vue`에 구성하고 메인 경로 `/`와 연결
+- `src/router/index.js`에서 날씨 서비스에 필요한 Route 구성
+  - `/` → 날씨 메인 페이지
+  - `/about` → 서비스 소개 페이지
+  - `/guide` → 이용 가이드 페이지
+  - `/weather/:cityId` → 도시별 날씨 상세 페이지
+  - 존재하지 않는 경로 → 404 페이지
+- `App.vue`에 공통 Header와 Navigation 구성
+- `RouterLink`를 사용하여 날씨, 서비스 소개, 이용 가이드 페이지 간 이동 구현
+- `RouterView`를 사용하여 현재 URL에 해당하는 View가 공통 레이아웃 내부에 렌더링되도록 구성
+- `WeatherHomeView.vue`에서 날씨 카드의 상세보기 버튼 클릭 시 `useRouter()`와 `router.push()`를 사용하여 해당 도시의 상세 페이지로 이동
+- 도시별 고유 ID를 URL의 `cityId` Route Parameter로 전달
+- `WeatherDetailView.vue`에서 `useRoute()`를 사용하여 URL의 `cityId` 값 확인
+- 전달받은 `cityId`와 일치하는 Mock Data를 찾아 도시명, 현재 기온, 날씨 상태 등의 상세 정보 출력
+- 잘못된 도시 ID가 전달된 경우 도시 정보를 찾을 수 없다는 안내 화면 표시
+- `WeatherAboutView.vue`를 생성하여 Weather Dashboard 서비스 소개 페이지 구성
+- `WeatherGuideView.vue`를 생성하여 검색, 카드 선택, 상세 페이지 이동 방법 안내
+- `NotFoundView.vue`를 생성하여 등록되지 않은 URL 접근 시 404 안내 화면 표시
+- 각 페이지에서 메인 대시보드로 다시 이동할 수 있도록 `RouterLink` 또는 `router.push()` 활용
+
+#### 실습 결과
+
+Vue Router를 적용하여 하나의 날씨 대시보드 화면에서 여러 페이지로 확장되는 SPA 구조를 구현했다. `App.vue`에는 모든 페이지에서 공통으로 사용하는 Header와 Navigation을 배치하고, `RouterView`를 통해 현재 URL에 맞는 View가 표시되도록 구성했다.
+
+날씨 메인 화면에서는 기존에 구현한 검색, 카드 선택, 컴포넌트 구조를 유지하면서 상세보기 버튼을 클릭하면 `/weather/:cityId` 형태의 URL로 이동하도록 변경했다. 상세 페이지에서는 URL을 통해 전달된 `cityId`를 읽어 해당 도시의 Mock Data를 찾아 출력하는 동적 라우팅을 구현했다.
+
+또한 서비스 소개와 이용 가이드 페이지를 별도의 View로 분리했으며, 등록되지 않은 주소에 접근했을 때는 404 Not Found 페이지가 표시되도록 구성했다. 이를 통해 Vue Router를 활용한 페이지 이동, 동적 Route Parameter 전달, 공통 레이아웃 구성 및 예외 경로 처리 방법을 확인했다.
+
+#### 핵심 정리
+
+- **Vue Router**
+  - Vue 기반 SPA에서 URL에 따라 서로 다른 화면을 표시할 수 있도록 페이지 이동을 관리하는 공식 Router
+  - 페이지 전체를 새로 불러오지 않고 필요한 View만 변경할 수 있음
+
+- **createRouter()**
+  - 애플리케이션에서 사용할 Router 객체를 생성하는 함수
+  - `routes` 배열을 통해 URL과 해당 URL에서 표시할 컴포넌트를 연결함
+
+- **createWebHistory()**
+  - 브라우저의 History API를 활용하여 일반적인 URL 형태로 페이지 이동을 관리함
+  - 이번 실습에서는 `createWebHistory(import.meta.env.BASE_URL)` 형태로 사용함
+
+- **RouterLink**
+  - Vue Router에서 페이지 이동 링크를 만들 때 사용하는 컴포넌트
+  - 일반 `<a>` 태그와 달리 SPA의 페이지 이동 방식을 유지하면서 URL을 변경함
+  - 이번 실습에서는 날씨, 서비스 소개, 이용 가이드 페이지 이동에 활용함
+
+- **RouterView**
+  - 현재 URL과 일치하는 Route의 View 컴포넌트가 렌더링되는 위치
+  - 공통 Header는 유지하면서 본문 영역만 URL에 따라 변경할 수 있음
+
+- **useRouter()**
+  - `<script setup>` 내부에서 Router 객체를 사용하기 위한 함수
+  - `router.push()`를 이용하면 사용자 이벤트나 로직에 따라 원하는 URL로 이동할 수 있음
+  - 이번 실습에서는 날씨 카드의 상세보기 버튼을 클릭했을 때 상세 페이지로 이동하는 데 활용함
+
+- **useRoute()**
+  - 현재 접근 중인 Route의 정보를 확인하기 위한 함수
+  - URL Parameter, Query String 등의 값을 읽을 수 있음
+  - 이번 실습에서는 `route.params.cityId`를 통해 선택한 도시의 ID를 확인함
+
+- **Dynamic Route**
+  - URL의 일부를 동적인 값으로 사용하는 Routing 방식
+  - `/weather/:cityId`에서 `:cityId` 부분에 도시별 ID가 전달됨
+  - 하나의 상세 View를 여러 도시에서 공통으로 사용할 수 있음
+
+- **Route Parameter**
+  - URL 경로에 포함하여 페이지에 값을 전달하는 방식
+  - 예를 들어 `/weather/city_01`로 이동하면 `city_01`이 `cityId` 값으로 전달됨
+
+- **404 Route**
+  - 정의되지 않은 URL에 접근했을 때 보여줄 페이지를 처리하는 Route
+  - `/:pathMatch(.*)*` 패턴을 사용하여 기존 Route와 일치하지 않는 모든 경로를 처리함
+
+#### 라우팅 구조
+
+```text
+App.vue
+├─ /                    → WeatherHomeView.vue
+├─ /about               → WeatherAboutView.vue
+├─ /guide               → WeatherGuideView.vue
+├─ /weather/:cityId     → WeatherDetailView.vue
+└─ 그 외 경로            → NotFoundView.vue
+```
+
+#### 페이지 이동 흐름
+
+```text
+WeatherHomeView.vue
+      │
+      │ 상세보기
+      ▼
+/weather/:cityId
+      │
+      ▼
+WeatherDetailView.vue
+      │
+      │ route.params.cityId
+      ▼
+해당 도시 Mock Data 조회
+```
+
+#### 직접 구현 및 수정한 파일
+
+`package.json`  
+`package-lock.json`  
+`src/App.vue`  
+`src/router/index.js`  
+`src/views/WeatherHomeView.vue`  
+`src/views/WeatherDetailView.vue`  
+`src/views/WeatherAboutView.vue`  
+`src/views/WeatherGuideView.vue`  
+`src/views/NotFoundView.vue`
