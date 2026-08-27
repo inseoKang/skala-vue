@@ -520,3 +520,146 @@ configStore.formatTemperature(28)
 `src/components/exercise/UnitToggler.vue`  
 `src/components/exercise/WeatherCard.vue`  
 `src/views/WeatherDetailView.vue`
+
+### 06. Weather Axios
+
+#### 학습 내용
+
+- Axios를 활용한 외부 API 비동기 통신 방법 이해
+- `async / await`을 활용한 API 요청 및 응답 처리
+- OpenWeatherMap API를 활용한 실제 날씨 데이터 조회
+- 여러 API 요청을 `Promise.all()`로 동시에 처리하는 방법 학습
+- API 요청 중 Loading 상태와 오류 발생 시 Error 상태를 관리하는 방법 이해
+- 환경 변수를 활용하여 API Key를 코드와 분리하는 방법 학습
+- 외부 API를 추가로 연동하여 기존 Application의 기능을 확장하는 방법 이해
+- 기존 Mock Data를 실제 API 데이터로 대체하는 과정 이해
+
+#### 실습 내용
+
+- 프로젝트에 Axios 라이브러리 설치
+- OpenWeatherMap API 가입 및 API Key 발급
+- `.env` 파일에 `VITE_OPENWEATHER_API_KEY` 환경 변수 등록
+- `src/data/cities.js`를 생성하여 도시별 ID, 이름, 위도, 경도 정보를 관리
+- `src/services/weatherApi.js`를 생성하여 외부 API 요청 로직 분리
+- Axios를 사용하여 OpenWeatherMap Current Weather API 호출
+- 기존 Mock Data의 고정 기온과 날씨 상태를 제거하고 실제 API 응답 데이터로 대체
+- API를 통해 현재 기온, 날씨 상태, 습도, 풍속 등의 실제 날씨 정보 조회
+- `WeatherHomeView.vue`에서 여러 도시의 현재 날씨를 조회하여 기존 WeatherCard 컴포넌트에 전달
+- 날씨 데이터를 불러오는 동안 Loading 메시지가 표시되도록 구현
+- API 요청 실패 시 사용자에게 오류 메시지가 표시되도록 Error 처리
+- 기존 검색 기능, 카드 선택 기능, Vue Router 상세 페이지 이동 기능 유지
+- 기존 Pinia Store와 연동하여 API에서 받은 섭씨 온도를 `°C / °F`로 변환하여 표시
+- OpenWeatherMap의 Forecast API를 추가로 활용하여 도시별 시간대별 날씨 예보 제공
+- 상세 페이지에서 현재 기온, 체감 온도, 날씨 상태, 습도, 풍속 등의 상세 정보 제공
+- `Promise.all()`을 사용하여 현재 날씨, 예보, 대기질 데이터를 동시에 요청
+- OpenWeatherMap 외의 외부 API인 Open-Meteo Air Quality API 추가 연동
+- Open-Meteo API를 통해 PM10, PM2.5, US AQI 정보를 조회하여 상세 페이지에 대기질 정보 제공
+
+#### 실습 결과
+
+기존에 직접 작성한 Mock Data 대신 Axios를 사용하여 OpenWeatherMap API에서 실제 날씨 데이터를 받아 화면에 표시하도록 변경했다. 도시별 위도와 경도를 기준으로 현재 날씨를 조회하고, API 응답에서 현재 기온, 날씨 상태, 습도, 풍속 등의 값을 추출하여 기존 WeatherCard 컴포넌트에 전달했다.
+
+상세 페이지에서는 OpenWeatherMap의 Current Weather API와 Forecast API를 활용하여 현재 날씨뿐만 아니라 체감 온도와 시간대별 예보도 확인할 수 있도록 기능을 확장했다. 여러 API 요청은 `Promise.all()`을 사용하여 동시에 처리하도록 구성했다.
+
+또한 OpenWeatherMap 이외의 외부 API인 Open-Meteo Air Quality API를 추가로 연동하여 PM10, PM2.5, US AQI 등의 대기질 정보를 제공하도록 Application 기능을 확장했다.
+
+API 요청 중에는 Loading 상태를 표시하고 요청 실패 시 Error 메시지를 출력하도록 예외 처리했으며, 기존 Pinia Store와 연동하여 실제 API에서 받은 섭씨 데이터를 사용자가 선택한 온도 단위에 따라 Celsius 또는 Fahrenheit로 표시하도록 기존 기능도 유지했다.
+
+#### 핵심 정리
+
+- **Axios**
+  - JavaScript에서 HTTP 요청을 처리하기 위해 사용하는 라이브러리
+  - 외부 API 또는 서버와 데이터를 주고받을 때 활용할 수 있음
+  - 이번 실습에서는 OpenWeatherMap과 Open-Meteo API 요청에 사용함
+
+- **API**
+  - 서로 다른 Application이 정해진 방식으로 데이터와 기능을 주고받을 수 있도록 제공되는 인터페이스
+  - 이번 실습에서는 외부 날씨 및 대기질 서비스를 Vue Application과 연결함
+
+- **async / await**
+  - 비동기 작업의 결과를 기다린 후 다음 코드를 실행할 수 있도록 하는 JavaScript 문법
+  - API 응답을 기다린 뒤 받은 데이터를 화면에 적용하는 데 활용함
+
+- **Promise.all()**
+  - 여러 비동기 작업을 동시에 실행하고 모든 작업이 완료될 때까지 기다리는 방법
+  - 상세 페이지에서 현재 날씨, 날씨 예보, 대기질 API를 동시에 요청하는 데 활용함
+
+- **OpenWeatherMap Current Weather API**
+  - 위도와 경도를 기준으로 현재 날씨 정보를 조회하는 데 사용함
+  - 현재 기온, 체감 온도, 습도, 풍속, 날씨 상태 등의 정보를 활용함
+
+- **OpenWeatherMap Forecast API**
+  - 현재 날씨 외에 미래의 날씨 예보 데이터를 제공하는 API
+  - 이번 실습에서는 상세 페이지에 시간대별 날씨 예보를 추가하는 데 활용함
+
+- **Open-Meteo Air Quality API**
+  - OpenWeatherMap 이외에 추가로 연동한 외부 API
+  - PM10, PM2.5, US AQI 등의 대기질 정보를 조회하여 날씨 Application의 기능을 확장함
+
+- **환경 변수**
+  - API Key처럼 코드에 직접 작성하지 않는 것이 좋은 설정값을 별도의 환경 파일로 관리하는 방법
+  - 이번 실습에서는 `.env` 파일의 `VITE_OPENWEATHER_API_KEY`를 사용함
+
+- **Loading / Error 상태**
+  - API 요청은 응답까지 시간이 필요하거나 실패할 가능성이 있으므로 요청 상태를 별도로 관리하는 것이 중요함
+  - 데이터를 불러오는 동안 Loading 메시지를 표시하고 요청 실패 시 Error 메시지를 제공하도록 구현함
+
+- **Mock Data → API Data**
+  - 이전 실습에서는 직접 작성한 기온과 날씨 데이터를 사용했지만 이번 실습에서는 실제 API 응답으로 대체함
+  - 도시의 ID, 이름, 위치 정보는 별도로 관리하고 실제 날씨 정보는 API 요청 시점에 받아오도록 구성함
+
+#### API 구성
+
+```text
+Weather Application
+        │
+        ├─ OpenWeatherMap Current Weather API
+        │     ├─ 현재 기온
+        │     ├─ 체감 온도
+        │     ├─ 날씨 상태
+        │     ├─ 습도
+        │     └─ 풍속
+        │
+        ├─ OpenWeatherMap Forecast API
+        │     └─ 시간대별 날씨 예보
+        │
+        └─ Open-Meteo Air Quality API
+              ├─ PM10
+              ├─ PM2.5
+              └─ US AQI
+```
+
+#### 데이터 처리 흐름
+
+```text
+cities.js
+   │
+   │ 도시별 위도 / 경도
+   ▼
+weatherApi.js
+   │
+   │ Axios API 요청
+   ▼
+외부 API
+   │
+   ▼
+WeatherHomeView / WeatherDetailView
+   │
+   ├─ 실제 날씨 데이터 표시
+   ├─ Loading / Error 처리
+   │
+   └─ Pinia configStore
+          │
+          └─ °C ↔ °F 변환
+```
+
+#### 직접 구현 및 수정한 파일
+
+`package.json`  
+`package-lock.json`  
+`.env`  
+`.gitignore`  
+`src/data/cities.js`  
+`src/services/weatherApi.js`  
+`src/views/WeatherHomeView.vue`  
+`src/views/WeatherDetailView.vue`
