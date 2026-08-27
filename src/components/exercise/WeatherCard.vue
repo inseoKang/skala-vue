@@ -1,4 +1,6 @@
 <script setup>
+import { useConfigStore } from '@/stores/configStore'
+
 defineProps({
   cityItem: {
     type: Object,
@@ -7,6 +9,8 @@ defineProps({
 })
 
 const emit = defineEmits(['select-card', 'click-detail'])
+
+const configStore = useConfigStore()
 </script>
 
 <template>
@@ -16,7 +20,7 @@ const emit = defineEmits(['select-card', 'click-detail'])
 
       <p>
         현재 기온:
-        <strong>{{ cityItem.temp }}°C</strong>
+        <strong>{{ configStore.formatTemperature(cityItem.temp) }}</strong>
       </p>
 
       <span v-if="cityItem.temp >= 25" class="weather-badge hot"> 🔥 더움 (25도 이상) </span>

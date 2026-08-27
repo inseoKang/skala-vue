@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useConfigStore } from '@/stores/configStore'
 
 const route = useRoute()
 const router = useRouter()
+const configStore = useConfigStore()
 
 const city = ref(null)
 
@@ -51,7 +53,7 @@ const goHome = () => {
 
         <div class="detail-row">
           <span>현재 기온</span>
-          <strong>{{ city.temp }}°C</strong>
+          <strong>{{ configStore.formatTemperature(city.temp) }}</strong>
         </div>
 
         <div class="detail-row">
