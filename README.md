@@ -376,3 +376,147 @@ WeatherDetailView.vue
 `src/views/WeatherAboutView.vue`  
 `src/views/WeatherGuideView.vue`  
 `src/views/NotFoundView.vue`
+
+### 05. Pinia Store
+
+#### 학습 내용
+
+- Pinia를 활용한 Vue 전역 상태 관리 방식 이해
+- `defineStore()`를 활용한 Store 생성 방법 학습
+- `state`를 활용한 전역 상태 저장
+- `getters`를 활용한 상태 기반 값 계산 및 반환
+- `actions`를 활용한 Store 상태 변경
+- 여러 컴포넌트에서 동일한 Store를 공유하는 방법 이해
+- 전역 상태 변경 시 해당 상태를 사용하는 컴포넌트가 반응형으로 갱신되는 동작 확인
+- 공통 로직을 Store에 분리하여 컴포넌트 간 중복 코드를 줄이는 방법 이해
+
+#### 실습 내용
+
+- 프로젝트에 Pinia 패키지 설치
+- `main.js`에서 `createPinia()`를 생성하고 Vue 애플리케이션에 등록
+- `src/stores/configStore.js`를 생성하여 날씨 단위 설정을 관리하는 Store 구성
+- `unit` state를 생성하고 초기값을 `celsius`로 설정
+- 현재 온도 단위에 따라 `°C` 또는 `°F`를 반환하는 `unitSymbol` getter 구현
+- `celsius`와 `fahrenheit` 값을 서로 전환하는 `toggleUnit()` action 구현
+- 추가 getter인 `formatTemperature`를 구현하여 섭씨 원본 데이터를 현재 설정된 단위에 맞게 변환
+  - Celsius 선택 시 기존 섭씨 값 출력
+  - Fahrenheit 선택 시 `(섭씨 × 9 / 5) + 32` 공식을 적용하여 화씨로 변환
+  - 변환된 온도는 반올림하여 출력
+- `UnitToggler.vue` 컴포넌트를 생성하여 온도 단위 변경 버튼 구현
+- Navigation 영역에 `UnitToggler.vue`를 배치하여 모든 페이지에서 단위 설정을 변경할 수 있도록 구성
+- `WeatherCard.vue`에서 기존에 고정되어 있던 `°C` 표시를 Store의 `formatTemperature` getter를 사용하도록 변경
+- `WeatherDetailView.vue`에서도 동일한 Store를 사용하여 상세 페이지의 온도 단위가 함께 변경되도록 구현
+- 날씨 데이터 자체는 섭씨 원본 값으로 유지하고 화면에 출력할 때만 선택한 단위로 변환
+- 메인 화면과 상세 화면에서 각각 온도 변환 코드를 작성하지 않고 Store의 공통 getter를 사용하도록 구성
+
+#### 실습 결과
+
+Pinia를 적용하여 날씨 대시보드의 온도 단위 설정을 전역 상태로 관리하도록 구현했다. `configStore.js`에서 현재 단위를 나타내는 `unit` 상태를 관리하고, `toggleUnit()` action을 통해 Celsius와 Fahrenheit 상태를 전환할 수 있도록 구성했다.
+
+Navigation에 배치한 단위 변경 버튼을 클릭하면 Pinia Store의 상태가 변경되고, 동일한 Store를 사용하는 메인 날씨 카드와 도시 상세 페이지의 온도 표시가 별도의 데이터 전달 없이 동시에 변경되는 것을 확인했다.
+
+또한 각 컴포넌트에서 직접 섭씨와 화씨 변환 공식을 작성하지 않고 `formatTemperature` getter를 Store에 추가하여 공통으로 사용했다. 이를 통해 전역 상태뿐만 아니라 여러 화면에서 반복되는 온도 변환 로직까지 Store에서 관리하여 코드 중복을 줄일 수 있었다.
+
+#### 핵심 정리
+
+- **Pinia**
+  - Vue 애플리케이션에서 여러 컴포넌트가 공유하는 상태를 관리하기 위한 상태 관리 라이브러리
+  - 서로 다른 컴포넌트나 View에서도 동일한 Store의 상태와 기능을 사용할 수 있음
+
+- **defineStore()**
+  - Pinia에서 Store를 정의할 때 사용하는 함수
+  - Store의 이름과 `state`, `getters`, `actions` 등을 정의할 수 있음
+
+- **State**
+  - 애플리케이션에서 여러 컴포넌트가 공유할 상태를 저장하는 영역
+  - 이번 실습에서는 현재 온도 단위를 나타내는 `unit` 값을 관리함
+  - 초기값은 `celsius`로 설정함
+
+- **Getters**
+  - Store의 state를 기반으로 필요한 값을 계산하거나 가공하여 반환하는 기능
+  - Vue의 `computed`와 유사한 역할을 함
+  - `unitSymbol`을 통해 현재 단위에 따라 `°C` 또는 `°F`를 반환하도록 구성함
+
+- **Actions**
+  - Store의 state를 변경하거나 관련 로직을 처리할 때 사용하는 기능
+  - 이번 실습에서는 `toggleUnit()`을 사용하여 `celsius`와 `fahrenheit` 상태를 전환함
+
+- **formatTemperature**
+  - 이번 실습에서 추가로 구현한 getter
+  - 원본 섭씨 온도를 현재 Store의 단위 설정에 맞추어 출력함
+  - 여러 컴포넌트에서 동일한 온도 변환 로직을 재사용하여 코드 중복을 줄임
+
+- **전역 상태 관리**
+  - 부모에서 자식으로 여러 단계의 `props`를 전달하지 않아도 필요한 컴포넌트가 Store에 직접 접근할 수 있음
+  - `UnitToggler.vue`, `WeatherCard.vue`, `WeatherDetailView.vue`가 동일한 `configStore`를 공유하도록 구성함
+
+- **반응형 상태 변경**
+  - Store의 `unit` 값이 변경되면 해당 상태를 사용하는 화면도 자동으로 다시 렌더링됨
+  - 따라서 단위 변경 버튼을 한 번 클릭하는 것만으로 메인 화면과 상세 페이지의 온도 표시를 동일하게 변경할 수 있음
+
+- **원본 데이터와 표시 데이터 분리**
+  - `cityItem.temp`와 같은 Mock Data는 기존 섭씨 값을 그대로 유지함
+  - 화면에 값을 출력하는 시점에만 Store를 이용하여 화씨로 변환함
+  - 원본 데이터를 직접 변경하지 않아 조건 판단이나 다른 로직에서 일관된 기준값을 사용할 수 있음
+
+#### Store 구조
+
+```text
+configStore
+├─ state
+│  └─ unit
+│     └─ 'celsius'
+│
+├─ getters
+│  ├─ unitSymbol
+│  └─ formatTemperature
+│
+└─ actions
+   └─ toggleUnit()
+```
+
+#### Store 사용 구조
+
+```text
+                     configStore
+                         │
+                unit: 'celsius'
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+    UnitToggler      WeatherCard   WeatherDetailView
+          │              │              │
+          │              └──── 온도 표시 ┘
+          │
+          └─ toggleUnit()
+                 │
+                 ▼
+       celsius ↔ fahrenheit
+```
+
+#### 온도 변환 흐름
+
+```text
+Mock Data
+temp: 28
+   │
+   ▼
+configStore.formatTemperature(28)
+   │
+   ├─ unit === 'celsius'
+   │      └─ 28°C
+   │
+   └─ unit === 'fahrenheit'
+          └─ 82°F
+```
+
+#### 직접 구현 및 수정한 파일
+
+`package.json`  
+`package-lock.json`  
+`src/main.js`  
+`src/App.vue`  
+`src/stores/configStore.js`  
+`src/components/exercise/UnitToggler.vue`  
+`src/components/exercise/WeatherCard.vue`  
+`src/views/WeatherDetailView.vue`
