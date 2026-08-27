@@ -5,9 +5,9 @@ import { useRouter } from 'vue-router'
 import DataView from 'primevue/dataview'
 import ProgressSpinner from 'primevue/progressspinner'
 
-import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import WeatherToolbar from '@/components/exercise/WeatherToolbar.vue'
 import WeatherCard from '@/components/exercise/WeatherCard.vue'
+import UnitToggler from '@/components/exercise/UnitToggler.vue'
 
 import { cities } from '@/data/cities'
 import { getCurrentWeather } from '@/services/weatherApi'
@@ -17,10 +17,10 @@ const router = useRouter()
 const weatherList = ref([])
 
 const searchQuery = ref('')
-const selectedCityInfo = ref('카드를 클릭하거나 검색해 보세요.')
+const selectedCityInfo = ref('원하는 도시를 선택해 상세 날씨를 확인해 보세요.')
 
 const sortKey = ref('default')
-const rows = ref(5)
+const rows = ref(10)
 const layout = ref('grid')
 
 const loading = ref(false)
@@ -106,7 +106,7 @@ const updateLayout = (value) => {
 }
 
 const selectCity = (cityName) => {
-  selectedCityInfo.value = `${cityName}이(가) 선택되었습니다.`
+  selectedCityInfo.value = `${cityName}을(를) 선택했습니다. 상세 정보를 확인해 보세요.`
 }
 
 const goToDetail = (city) => {
@@ -129,25 +129,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="weather-container">
-    <div class="title-area">
+  <section class="weather-page">
+    <header class="page-header">
       <div>
-        <p class="eyebrow">WEATHER DASHBOARD</p>
+        <h1>오늘의 날씨</h1>
 
-        <h1>🌤️ 실시간 날씨 대시보드</h1>
-
-        <p class="subtitle">
-          PrimeVue UI Library를 활용하여 날씨 정보를 검색하고 정렬할 수 있습니다.
-        </p>
+        <p>현재 날씨를 확인하고 원하는 지역을 찾아보세요.</p>
       </div>
+    </header>
 
-      <div class="city-count">
-        <strong>{{ displayedWeatherList.length }}</strong>
-        <span>개 도시</span>
-      </div>
-    </div>
-
-    <BaseDashboardCard>
+    <section class="toolbar-panel">
       <WeatherToolbar
         :current-query="searchQuery"
         :sort-key="sortKey"
@@ -158,28 +149,33 @@ onMounted(() => {
         @update-rows="updateRows"
         @update-layout="updateLayout"
       />
-    </BaseDashboardCard>
+    </section>
 
-    <BaseDashboardCard>
-      <div class="section-header">
+    <section class="weather-section">
+      <div class="section-heading">
         <div>
-          <h2>🏙️ 지역별 실시간 날씨</h2>
+          <h2>지역별 날씨</h2>
 
-          <p>원하는 도시를 선택해 상세 날씨를 확인해 보세요.</p>
+          <p>실시간 기온과 습도, 바람 정보를 확인할 수 있습니다.</p>
         </div>
 
-        <span class="result-count"> 총 {{ displayedWeatherList.length }}건 </span>
+        <div class="section-actions">
+          <UnitToggler />
+
+          <span class="result-count"> {{ displayedWeatherList.length }}개 결과 </span>
+        </div>
       </div>
 
       <div v-if="loading" class="loading-area">
-        <ProgressSpinner style="width: 44px; height: 44px" stroke-width="5" />
+        <ProgressSpinner style="width: 42px; height: 42px" stroke-width="5" />
 
-        <p>날씨 정보를 불러오는 중입니다...</p>
+        <p>최신 날씨를 확인하고 있어요.</p>
       </div>
 
-      <p v-else-if="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </p>
+      <div v-else-if="errorMessage" class="error-message">
+        <strong>날씨 정보를 불러오지 못했습니다.</strong>
+        <span>잠시 후 다시 시도해 주세요.</span>
+      </div>
 
       <template v-else>
         <DataView
@@ -217,182 +213,206 @@ onMounted(() => {
           </template>
         </DataView>
 
-        <p v-else class="empty-message">"{{ searchQuery }}"와 일치하는 도시가 없습니다.</p>
+        <div v-else class="empty-message">
+          <strong>검색 결과가 없습니다.</strong>
+          <span>다른 도시 이름으로 검색해 보세요.</span>
+        </div>
       </template>
-    </BaseDashboardCard>
+    </section>
 
-    <p class="guide-message">
+    <div class="selection-note">
+      <span class="selection-dot"></span>
       {{ selectedCityInfo }}
-    </p>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.weather-container {
+.weather-page {
   box-sizing: border-box;
   width: calc(100% - 48px);
   max-width: 1180px;
-  margin: 40px auto;
+  margin: 0 auto;
+  padding: 48px 0 64px;
 }
 
-.title-area {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
+.page-header {
   margin-bottom: 28px;
 }
 
-.eyebrow {
-  margin: 0 0 7px;
-  color: #3b82f6;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
-h1 {
+.page-header h1 {
   margin: 0;
-  color: #172033;
-  font-size: 30px;
+  color: var(--text);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
-.subtitle {
-  margin: 8px 0 0;
-  color: #7b8494;
+.page-header p {
+  margin: 9px 0 0;
+  color: var(--muted);
   font-size: 14px;
 }
 
-.city-count {
+.toolbar-panel {
+  padding: 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(35, 56, 85, 0.04);
+}
+
+.weather-section {
+  margin-top: 36px;
+}
+
+.section-heading {
   display: flex;
-  align-items: baseline;
-  gap: 5px;
-  padding: 13px 18px;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 12px;
-}
-
-.city-count strong {
-  color: #2563eb;
-  font-size: 22px;
-}
-
-.city-count span {
-  color: #64748b;
-  font-size: 13px;
-}
-
-.section-header {
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
-.section-header h2 {
+.section-heading h2 {
   margin: 0;
-  color: #263246;
-  font-size: 18px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.section-header p {
+.section-heading p {
   margin: 6px 0 0;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 13px;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .result-count {
-  padding: 7px 11px;
-  color: #2563eb;
+  padding: 8px 12px;
+  color: var(--primary-dark);
   font-size: 12px;
   font-weight: 700;
-  background-color: #eff6ff;
+  background-color: var(--primary-soft);
   border-radius: 999px;
   white-space: nowrap;
 }
 
 .weather-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .weather-list {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 12px;
 }
 
 .loading-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 45px 20px;
+  gap: 15px;
+  padding: 80px 20px;
 }
 
 .loading-area p {
   margin: 0;
-  color: #2563eb;
-  font-size: 14px;
-  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
 }
 
-.error-message {
-  margin: 0;
-  padding: 30px 20px;
-  color: #dc2626;
-  text-align: center;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-}
-
+.error-message,
 .empty-message {
-  margin: 0;
-  padding: 45px 20px;
-  color: #7b8494;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 70px 20px;
   text-align: center;
-  background-color: #f8fafc;
-  border: 1px dashed #d4dbe5;
-  border-radius: 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
 }
 
-.guide-message {
-  margin: 20px 0 0;
-  padding: 14px;
-  color: #15803d;
-  text-align: center;
-  font-size: 14px;
-  font-weight: 700;
-  background-color: #ecfdf3;
-  border: 1px solid #bbf7d0;
-  border-radius: 10px;
+.error-message strong {
+  color: #b75050;
 }
 
-@media (max-width: 768px) {
-  .weather-container {
-    width: calc(100% - 24px);
-    margin: 24px auto;
+.empty-message strong {
+  color: var(--text);
+}
+
+.error-message span,
+.empty-message span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.selection-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.selection-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--mint);
+  border-radius: 50%;
+}
+
+:deep(.p-dataview-content) {
+  background-color: transparent;
+}
+
+:deep(.p-paginator) {
+  margin-top: 26px;
+  padding: 10px;
+  background-color: transparent;
+  border: 0;
+}
+
+@media (max-width: 960px) {
+  .weather-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .weather-page {
+    width: calc(100% - 28px);
+    padding: 30px 0 48px;
   }
 
-  .title-area {
+  .page-header h1 {
+    font-size: 27px;
+  }
+
+  .section-heading {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  h1 {
-    font-size: 24px;
+  .section-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .weather-grid {
     grid-template-columns: 1fr;
-  }
-
-  .section-header {
-    flex-direction: column;
   }
 }
 </style>

@@ -1,12 +1,15 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import Button from 'primevue/button'
+import Tag from 'primevue/tag'
+import ProgressSpinner from 'primevue/progressspinner'
 
 import { useConfigStore } from '@/stores/configStore'
 import { cities } from '@/data/cities'
 
 import { getCurrentWeather, getWeatherForecast, getAirQuality } from '@/services/weatherApi'
-import Button from 'primevue/button'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,6 +21,51 @@ const airQuality = ref(null)
 
 const loading = ref(false)
 const errorMessage = ref('')
+
+const airQualityState = computed(() => {
+  const aqi = Number(airQuality.value?.aqi)
+
+  if (!Number.isFinite(aqi)) {
+    return null
+  }
+
+  if (aqi <= 50) {
+    return {
+      label: '좋음',
+      severity: 'success',
+    }
+  }
+
+  if (aqi <= 100) {
+    return {
+      label: '보통',
+      severity: 'info',
+    }
+  }
+
+  if (aqi <= 150) {
+    return {
+      label: '민감군 주의',
+      severity: 'warn',
+    }
+  }
+
+  return {
+    label: '나쁨',
+    severity: 'danger',
+  }
+})
+
+const formatForecastTime = (dateTime) => {
+  if (!dateTime) {
+    return ''
+  }
+
+  const [datePart, timePart] = dateTime.split(' ')
+  const [, month, day] = datePart.split('-')
+
+  return `${Number(month)}월 ${Number(day)}일 ${timePart.slice(0, 5)}`
+}
 
 const loadWeatherDetail = async () => {
   const cityId = route.params.cityId
@@ -77,272 +125,501 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="detail-container">
-    <div class="title-area">
-      <p class="eyebrow">WEATHER DETAIL</p>
+  <section class="detail-page">
+    <Button label="날씨 목록으로" text size="small" class="back-button" @click="goHome" />
 
-      <h1>🌤️ 날씨 상세 정보</h1>
+    <div v-if="loading" class="loading-area">
+      <ProgressSpinner style="width: 44px; height: 44px" stroke-width="5" />
 
-      <p class="subtitle">실제 날씨 API를 활용한 도시별 상세 정보입니다.</p>
+      <p>날씨 정보를 불러오고 있어요.</p>
     </div>
 
-    <p v-if="loading" class="loading-message">상세 날씨 정보를 불러오는 중입니다...</p>
+    <div v-else-if="errorMessage" class="error-state">
+      <strong>{{ errorMessage }}</strong>
 
-    <div v-else-if="errorMessage" class="error-area">
-      <p class="error-message">
-        {{ errorMessage }}
-      </p>
+      <p>날씨 목록으로 돌아가 다시 선택해 주세요.</p>
 
-      <Button label="메인 대시보드로 돌아가기" @click="goHome" />
+      <Button label="날씨 목록으로 돌아가기" @click="goHome" />
     </div>
 
     <template v-else-if="city">
-      <div class="detail-card">
-        <h2>📍 현재 날씨</h2>
+      <header class="detail-header">
+        <div>
+          <h1>{{ city.name }} 날씨</h1>
 
-        <div class="detail-row">
-          <span>도시 ID</span>
-          <strong>{{ city.id }}</strong>
+          <p>현재 날씨와 앞으로의 예보를 확인해 보세요.</p>
         </div>
 
-        <div class="detail-row">
-          <span>도시</span>
-          <strong>{{ city.name }}</strong>
-        </div>
+        <span class="updated-label"> 실시간 정보 </span>
+      </header>
 
-        <div class="detail-row">
-          <span>현재 기온</span>
-          <strong>
+      <section class="current-weather-card">
+        <div class="current-summary">
+          <span class="summary-label"> 현재 날씨 </span>
+
+          <strong class="current-temperature">
             {{ configStore.formatTemperature(city.temp) }}
           </strong>
-        </div>
 
-        <div class="detail-row">
-          <span>체감 온도</span>
-          <strong>
+          <p class="current-status">
+            {{ city.status }}
+          </p>
+
+          <span class="feels-like">
+            체감
             {{ configStore.formatTemperature(city.feelsLike) }}
-          </strong>
-        </div>
-
-        <div class="detail-row">
-          <span>날씨 상태</span>
-          <strong>{{ city.status }}</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>습도</span>
-          <strong>{{ city.humidity }}%</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>풍속</span>
-          <strong>{{ city.windSpeed }} m/s</strong>
-        </div>
-      </div>
-
-      <div class="detail-card">
-        <h2>🕒 시간대별 날씨 예보</h2>
-
-        <div v-for="forecast in forecastList" :key="forecast.dateTime" class="forecast-row">
-          <span class="forecast-time">
-            {{ forecast.dateTime }}
-          </span>
-
-          <strong>
-            {{ configStore.formatTemperature(forecast.temp) }}
-          </strong>
-
-          <span class="forecast-status">
-            {{ forecast.status }}
           </span>
         </div>
+
+        <div class="current-metrics">
+          <div class="metric-card humidity">
+            <span>습도</span>
+            <strong>{{ city.humidity }}%</strong>
+            <small>현재 상대습도</small>
+          </div>
+
+          <div class="metric-card wind">
+            <span>바람</span>
+            <strong>{{ city.windSpeed.toFixed(1) }} m/s</strong>
+            <small>현재 풍속</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-title">
+          <div>
+            <h2>시간대별 예보</h2>
+
+            <p>앞으로의 기온 변화를 확인해 보세요.</p>
+          </div>
+        </div>
+
+        <div class="forecast-grid">
+          <article v-for="forecast in forecastList" :key="forecast.dateTime" class="forecast-card">
+            <span class="forecast-time">
+              {{ formatForecastTime(forecast.dateTime) }}
+            </span>
+
+            <strong class="forecast-temp">
+              {{ configStore.formatTemperature(forecast.temp) }}
+            </strong>
+
+            <span class="forecast-status">
+              {{ forecast.status }}
+            </span>
+          </article>
+        </div>
+      </section>
+
+      <section v-if="airQuality" class="content-section air-section">
+        <div class="section-title">
+          <div>
+            <h2>대기질</h2>
+
+            <p>현재 지역의 미세먼지와 대기질 정보입니다.</p>
+          </div>
+
+          <Tag
+            v-if="airQualityState"
+            :value="airQualityState.label"
+            :severity="airQualityState.severity"
+            rounded
+          />
+        </div>
+
+        <div class="air-grid">
+          <article class="air-card aqi-card">
+            <span>US AQI</span>
+
+            <strong>
+              {{ airQuality.aqi ?? '-' }}
+            </strong>
+
+            <small>대기질 지수</small>
+          </article>
+
+          <article class="air-card pm10-card">
+            <span>PM10</span>
+
+            <strong>
+              {{ airQuality.pm10 ?? '-' }}
+            </strong>
+
+            <small>μg/m³</small>
+          </article>
+
+          <article class="air-card pm25-card">
+            <span>PM2.5</span>
+
+            <strong>
+              {{ airQuality.pm25 ?? '-' }}
+            </strong>
+
+            <small>μg/m³</small>
+          </article>
+        </div>
+      </section>
+
+      <div class="detail-footer">
+        <Button label="다른 지역 날씨 보기" outlined @click="goHome" />
       </div>
-
-      <div v-if="airQuality" class="detail-card">
-        <h2>🌫️ 대기질 정보</h2>
-
-        <div class="detail-row">
-          <span>PM10</span>
-          <strong>{{ airQuality.pm10 }} μg/m³</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>PM2.5</span>
-          <strong>{{ airQuality.pm25 }} μg/m³</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>US AQI</span>
-          <strong>{{ airQuality.aqi }}</strong>
-        </div>
-      </div>
-
-      <button @click="goHome">메인 대시보드로 돌아가기</button>
     </template>
   </section>
 </template>
 
 <style scoped>
-.detail-container {
+.detail-page {
   box-sizing: border-box;
   width: calc(100% - 48px);
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 36px 40px;
-  background-color: #ffffff;
-  border: 1px solid #e7ebf0;
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 34px 0 70px;
 }
 
-.title-area {
-  margin-bottom: 28px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.eyebrow {
-  margin: 0 0 6px;
-  color: #3b82f6;
+.back-button {
+  margin-bottom: 22px;
+  padding-left: 0;
+  color: var(--muted);
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
-h1 {
+.detail-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 26px;
+}
+
+.detail-header h1 {
   margin: 0;
-  color: #172033;
-  font-size: 28px;
+  color: var(--text);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
-h2 {
-  margin: 0 0 16px;
-  color: #263246;
-  font-size: 17px;
-}
-
-.subtitle {
+.detail-header p {
   margin: 8px 0 0;
-  color: #7b8494;
+  color: var(--muted);
   font-size: 14px;
 }
 
-.detail-card {
-  margin-bottom: 24px;
-  padding: 22px;
-  background-color: #f8fafc;
-  border: 1px solid #e3e8ef;
-  border-radius: 14px;
+.updated-label {
+  padding: 7px 11px;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+  background-color: var(--primary-soft);
+  border-radius: 999px;
 }
 
-.detail-row {
+.current-weather-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.15fr) minmax(300px, 1fr);
+  gap: 24px;
+  padding: 30px;
+  background: linear-gradient(135deg, #edf6ff 0%, #f8fbff 55%, #fff7e9 100%);
+  border: 1px solid #dce9f6;
+  border-radius: 20px;
+  box-shadow: 0 12px 34px rgba(35, 71, 111, 0.07);
+}
+
+.current-summary {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.summary-label {
+  padding: 6px 10px;
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 800;
+  background-color: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+}
+
+.current-temperature {
+  margin-top: 24px;
+  color: var(--text);
+  font-size: 60px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.07em;
+}
+
+.current-status {
+  margin: 13px 0 0;
+  color: var(--text-subtle);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.feels-like {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.current-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-self: center;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+}
+
+.metric-card.humidity {
+  border-bottom: 3px solid #76b7eb;
+}
+
+.metric-card.wind {
+  border-bottom: 3px solid var(--mint);
+}
+
+.metric-card span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.metric-card strong {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.metric-card small {
+  margin-top: 5px;
+  color: #9aa6b6;
+  font-size: 10px;
+}
+
+.content-section {
+  margin-top: 36px;
+}
+
+.section-title {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 15px 0;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
 }
 
-.detail-row:last-child {
-  border-bottom: none;
+.section-title h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.detail-row span {
-  color: #7b8494;
+.section-title p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
-.detail-row strong {
-  color: #263246;
-  text-align: right;
-}
-
-.forecast-row {
+.forecast-grid {
   display: grid;
-  grid-template-columns: 1.5fr 0.7fr 1fr;
-  align-items: center;
-  gap: 16px;
-  padding: 15px 0;
-  border-bottom: 1px solid #e5e7eb;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.forecast-row:last-child {
-  border-bottom: none;
+.forecast-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 128px;
+  padding: 17px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.forecast-card:nth-child(odd) {
+  border-top: 3px solid #a9cdf2;
+}
+
+.forecast-card:nth-child(even) {
+  border-top: 3px solid #f1c77f;
+}
+
+.forecast-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(35, 56, 85, 0.06);
 }
 
 .forecast-time {
-  color: #667085;
-  font-size: 14px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
-.forecast-row strong {
-  color: #263246;
-  text-align: center;
+.forecast-temp {
+  margin-top: 18px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 800;
 }
 
 .forecast-status {
-  color: #667085;
-  text-align: right;
-  font-size: 14px;
+  margin-top: auto;
+  color: var(--text-subtle);
+  font-size: 11px;
 }
 
-.loading-message,
-.error-message {
-  margin: 0 0 24px;
-  padding: 30px 20px;
-  text-align: center;
-  border-radius: 10px;
+.air-section {
+  padding-top: 4px;
 }
 
-.loading-message {
-  color: #2563eb;
-  background-color: #eff6ff;
-  border: 1px solid #bfdbfe;
+.air-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.error-message {
-  color: #dc2626;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
+.air-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 15px;
 }
 
-.error-area {
-  text-align: center;
+.aqi-card {
+  background-color: var(--primary-soft);
+  border-color: #d5e7fa;
 }
 
-button {
-  padding: 10px 16px;
-  color: #ffffff;
-  font-size: 14px;
+.pm10-card {
+  background-color: var(--mint-soft);
+  border-color: #d9eee9;
+}
+
+.pm25-card {
+  background-color: var(--sun-soft);
+  border-color: #f3e2c3;
+}
+
+.air-card span {
+  color: var(--muted);
+  font-size: 11px;
   font-weight: 700;
-  cursor: pointer;
-  background-color: #3b82f6;
-  border: none;
-  border-radius: 9px;
 }
 
-button:hover {
-  background-color: #2563eb;
+.air-card strong {
+  margin-top: 9px;
+  color: var(--text);
+  font-size: 26px;
+  font-weight: 800;
 }
 
-@media (max-width: 768px) {
-  .detail-container {
-    width: calc(100% - 24px);
-    margin: 20px auto;
-    padding: 24px 18px;
-  }
+.air-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
 
-  h1 {
-    font-size: 23px;
-  }
+.detail-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 42px;
+}
 
-  .forecast-row {
+.loading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 130px 20px;
+}
+
+.loading-area p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 90px 20px;
+  text-align: center;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.error-state strong {
+  color: var(--text);
+  font-size: 17px;
+}
+
+.error-state p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  .current-weather-card {
     grid-template-columns: 1fr;
-    gap: 6px;
   }
 
-  .forecast-row strong,
-  .forecast-status {
-    text-align: left;
+  .forecast-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .detail-page {
+    width: calc(100% - 28px);
+    padding-top: 24px;
+  }
+
+  .detail-header {
+    align-items: flex-start;
+  }
+
+  .detail-header h1 {
+    font-size: 27px;
+  }
+
+  .current-weather-card {
+    padding: 22px;
+  }
+
+  .current-temperature {
+    font-size: 50px;
+  }
+
+  .current-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .air-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
