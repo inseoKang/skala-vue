@@ -1,24 +1,53 @@
 <script setup>
-import { ref, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import BaseDashboardCard from '@/components/exercise/BaseDashboardCard.vue'
 import SearchBar from '@/components/exercise/SearchBar.vue'
 import WeatherCard from '@/components/exercise/WeatherCard.vue'
 
+import { cities } from '@/data/cities'
+import { getCurrentWeather } from '@/services/weatherApi'
+
 const router = useRouter()
 
-const weatherList = ref([
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음' },
-  { id: 'city_02', name: '수원', temp: 24, status: '비' },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름' },
-  { id: 'city_04', name: '대구', temp: 30, status: '맑음' },
-  { id: 'city_09', name: '제주', temp: 29, status: '맑음' },
-  { id: 'city_10', name: '강릉', temp: 21, status: '흐림' },
-])
-
+const weatherList = ref([])
 const searchQuery = ref('')
 const selectedCityInfo = ref('카드를 클릭하거나 검색해 보세요.')
+
+const loading = ref(false)
+const errorMessage = ref('')
+
+const loadWeatherList = async () => {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    const weatherRequests = cities.map(async (city) => {
+      const data = await getCurrentWeather(city.lat, city.lon)
+
+      return {
+        id: city.id,
+        name: city.name,
+        lat: city.lat,
+        lon: city.lon,
+        temp: Math.round(data.main.temp),
+        status: data.weather[0]?.description ?? '정보 없음',
+        humidity: data.main.humidity,
+        windSpeed: data.wind.speed,
+        icon: data.weather[0]?.icon,
+      }
+    })
+
+    weatherList.value = await Promise.all(weatherRequests)
+  } catch (error) {
+    console.error('날씨 데이터를 가져오는 중 오류가 발생했습니다.', error)
+
+    errorMessage.value = '날씨 정보를 불러오지 못했습니다.'
+  } finally {
+    loading.value = false
+  }
+}
 
 const filteredWeatherList = computed(() => {
   const query = searchQuery.value.trim()
@@ -51,6 +80,10 @@ watch(selectedCityInfo, (newValue, oldValue) => {
 watchEffect(() => {
   console.log(`[watchEffect] 현재 검색어: ${searchQuery.value}`)
 })
+
+onMounted(() => {
+  loadWeatherList()
+})
 </script>
 
 <template>
@@ -58,9 +91,9 @@ watchEffect(() => {
     <div class="title-area">
       <p class="eyebrow">WEATHER DASHBOARD</p>
 
-      <h1>🌤️ 과제 4: 날씨 (Vue Router)</h1>
+      <h1>🌤️ 과제 6: 날씨 (Axios)</h1>
 
-      <p class="subtitle">Vue Router를 활용해 날씨 목록과 상세 페이지를 구성합니다.</p>
+      <p class="subtitle">OpenWeatherMap API를 활용해 실제 지역별 날씨 정보를 조회합니다.</p>
     </div>
 
     <BaseDashboardCard>
@@ -68,19 +101,27 @@ watchEffect(() => {
     </BaseDashboardCard>
 
     <BaseDashboardCard>
-      <h2>🏙️ 지역별 날씨 현황</h2>
+      <h2>🏙️ 지역별 실시간 날씨 현황</h2>
 
-      <WeatherCard
-        v-for="city in filteredWeatherList"
-        :key="city.id"
-        :city-item="city"
-        @select-card="selectCity"
-        @click-detail="goToDetail"
-      />
+      <p v-if="loading" class="loading-message">날씨 정보를 불러오는 중입니다...</p>
 
-      <p v-if="searchQuery && filteredWeatherList.length === 0" class="empty-message">
-        "{{ searchQuery }}"와 일치하는 도시가 없습니다.
+      <p v-else-if="errorMessage" class="error-message">
+        {{ errorMessage }}
       </p>
+
+      <template v-else>
+        <WeatherCard
+          v-for="city in filteredWeatherList"
+          :key="city.id"
+          :city-item="city"
+          @select-card="selectCity"
+          @click-detail="goToDetail"
+        />
+
+        <p v-if="searchQuery && filteredWeatherList.length === 0" class="empty-message">
+          "{{ searchQuery }}"와 일치하는 도시가 없습니다.
+        </p>
+      </template>
     </BaseDashboardCard>
 
     <p class="guide-message">
@@ -144,6 +185,26 @@ h2 {
   background-color: #ecfdf3;
   border: 1px solid #bbf7d0;
   border-radius: 10px;
+}
+
+.loading-message,
+.error-message {
+  margin: 0;
+  padding: 30px 20px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.loading-message {
+  color: #2563eb;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.error-message {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
 }
 
 .empty-message {
